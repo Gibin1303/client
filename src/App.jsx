@@ -39,6 +39,7 @@ const App = () => {
           }
         />
         <Route element={<Layout />}>
+          {/* <Route index element={<Navigate to="dashboard" replace />} /> */}
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/employees" element={<Employees />} />
           <Route path="/attendance" element={<Attebdance />} />
