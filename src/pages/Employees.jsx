@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { dummyEmployeeData, DEPARTMENTS } from "../assets/assets";
 import { Plus, Search, XIcon } from "lucide-react";
 import EmployeeCard from "../components/EmployeeCard";
@@ -12,7 +12,8 @@ const Employees = () => {
   const [editEmployee, setEditEmployee] = useState(null);
   const [showCreteModal, setShowCreateModal] = useState(null);
 
-  const fetchEmployees = () => {
+  const fetchEmployees = useCallback(async()=>{
+  
     setLoading(true);
     setEmployees(
       dummyEmployeeData.filter((emp) =>
@@ -21,8 +22,8 @@ const Employees = () => {
     );
     setTimeout(() => {
       setLoading(false);
-    }, 100);
-  };
+    }, 1000);
+},[])
 
   useEffect(() => {
     fetchEmployees();

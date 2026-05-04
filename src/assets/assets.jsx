@@ -292,7 +292,7 @@ export const dummyAttendanceData = [
 
 export function getWorkingHoursDisplay(record) {
     if (record.workingHours != null) {
-        const hrs = Math.floor(record.workingHours);
+        const hrs = Math.floor(record.workingHours );
         const mins = Math.round((record.workingHours - hrs) * 60);
         return `${hrs}h ${mins}m`;
     }
