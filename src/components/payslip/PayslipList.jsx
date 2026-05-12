@@ -3,6 +3,9 @@ import { DownloadIcon } from "lucide-react";
 import React from "react";
 
 const PayslipList = ({ payslips, isAdmin }) => {
+
+  console.log(payslips,"from payslips data and page");
+  
   return (
     <div className="card overflow-hidden">
       <div className="overflow-x-auto">

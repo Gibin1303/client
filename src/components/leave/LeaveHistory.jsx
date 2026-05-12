@@ -2,12 +2,24 @@ import React, { useState } from "react";
 import { getDayTypeDisplay, getWorkingHoursDisplay } from "../../assets/assets";
 import { format } from "date-fns";
 import { Check, Loader2, X } from "lucide-react";
+import api from "../../api/axios";
+import toast from "react-hot-toast";
 
 const LeaveHistory = ({ leaves, isAdmin, onUpdate }) => {
   const [processing, setProcessing] = useState(null);
+  console.log(leaves, "leaves from api");
+  
 
-  const handleStatusUpdate = (id, status) => {
+  const handleStatusUpdate = async(id, status) => {
     setProcessing(id);
+    try{
+      await api.patch(`/leave/${id}`, {status})
+      onUpdate()
+    }catch(error){
+      toast.error(error?.response?.data?.error || error.message)
+    }finally{
+      setProcessing(null)
+    }
   };
   return (
     <div className="card overflow-hidden">
@@ -42,7 +54,7 @@ const LeaveHistory = ({ leaves, isAdmin, onUpdate }) => {
                   >
                     {isAdmin && (
                       <td className="px-6 py-4 text-slate-900">
-                        {leaves.employee?.firstName}
+                        {leaves.employee?.firstName} 
                         {leaves.employee?.lastName}
                       </td>
                     )}

@@ -1,17 +1,32 @@
 import { Loader2, Save, User } from "lucide-react";
 import React, { useState } from "react";
+import api from "../api/axios";
+import toast from "react-hot-toast";
 
 const Profileform = ({ initialData, onSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true)
-    setTimeout(() => {
-       setLoading(false)
-    }, 2000);
+    // setLoading(true)
+    // setTimeout(() => {
+    //    setLoading(false)
+    // }, 2000);
+    setLoading(true);
+    setError("");
+    setMessage("");
+    const formData = new FormData(e.currentTarget);
+    try {
+      await api.post("/profile", formData);
+      setMessage("Profile Updated successfully");
+      onSuccess();
+    } catch (error) {
+      toast.error(error?.response?.data?.error || error.message)
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -81,18 +96,35 @@ const Profileform = ({ initialData, onSuccess }) => {
             className={`resize-none ${initialData.isDeleted ? "bg-slate-50 text-slate-400 cursor-not-allowed" : ""}`}
             rows={3}
           />
-          <p className="text-xs text-slate-400 mt-1.5">This will be displayed on your Profile</p>
+          <p className="text-xs text-slate-400 mt-1.5">
+            This will be displayed on your Profile
+          </p>
         </div>
-        {initialData.isDeleted ?(
+        {initialData.isDeleted ? (
           <div className="pt-2">
-                 <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-center">
-                  <p className="text-rose-600 font-medium tracking-tight">Account Deactivated</p>
-                  <p className="text-sm text-rose-500 mt-0.5">You can no longer available</p>
-                 </div>
+            <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-center">
+              <p className="text-rose-600 font-medium tracking-tight">
+                Account Deactivated
+              </p>
+              <p className="text-sm text-rose-500 mt-0.5">
+                You can no longer available
+              </p>
+            </div>
           </div>
-        ):(
+        ) : (
           <div className="flex justify-end pt-2">
-            <button type="submit" disabled={loading} className="btn-primary flex items-center gap-3 justify-center w-full sm:w-auto">{loading?<Loader2 className="w-5 h-5 animate-spin"/>:<Save className="w-5 h-5"/>}Save changes</button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-primary flex items-center gap-3 justify-center w-full sm:w-auto"
+            >
+              {loading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <Save className="w-5 h-5" />
+              )}
+              Save changes
+            </button>
           </div>
         )}
       </div>

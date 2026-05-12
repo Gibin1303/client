@@ -3,6 +3,8 @@ import { dummyAttendanceData } from "../assets/assets";
 import CheckInButton from "../components/attendance/CheckInButton";
 import AttendanceStatus from "../components/attendance/AttendanceStatus";
 import AttendanceHistory from "../components/attendance/AttendanceHistory";
+import api from "../api/axios";
+import toast from "react-hot-toast";
 
 const Attebdance = () => {
   const [history, setHistory] = useState([]);
@@ -10,10 +12,20 @@ const Attebdance = () => {
   const [isDeleted, setIsDeleted] = useState(false);
 
   const fetchData = useCallback(async () => {
-    setHistory(dummyAttendanceData);
-    setTimeout(() => {
+    // setHistory(dummyAttendanceData);
+    // setTimeout(() => {
+    //   setLoading(false);
+    // }, 1000);
+    try {
+      const res = await api.get("/attendance");
+      const json = res.data;
+      setHistory(json.data || []);
+      if (json.employee?.isDeleted) setIsDeleted(true);
+    } catch (error) {
+      toast.error(error?.response?.data?.error || error.message);
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   }, []);
 
   useEffect(() => {
@@ -22,13 +34,12 @@ const Attebdance = () => {
 
   if (loading) return <Loading />;
 
-  
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const todayRecord = history.find(
     (r) => new Date(r.date).toDateString() === today.toDateString(),
   );
- 
+
   return (
     <div className="animate-fade-in">
       <div className="page-header">
@@ -37,11 +48,20 @@ const Attebdance = () => {
           Track your work hours and daily check-in
         </p>
       </div>
-      {isDeleted ? <div className="mb-6 p-6 bg-rose-50 border-rose-200 rounded-2xl text-center">
-        <p className="text-rose-200">You can no longer cock in or out because your employee records have been marked as deleted </p>
-      </div> : <div className="mb-8"><CheckInButton todayRecord={todayRecord} onAction={fetchData}/></div>}
-      <AttendanceStatus history={history}/>
-      <AttendanceHistory history={history}/>
+      {isDeleted ? (
+        <div className="mb-6 p-6 bg-rose-50 border-rose-200 rounded-2xl text-center">
+          <p className="text-rose-200">
+            You can no longer cock in or out because your employee records have
+            been marked as deleted{" "}
+          </p>
+        </div>
+      ) : (
+        <div className="mb-8">
+          <CheckInButton todayRecord={todayRecord} onAction={fetchData} />
+        </div>
+      )}
+      <AttendanceStatus history={history} />
+      <AttendanceHistory history={history} />
     </div>
   );
 };
