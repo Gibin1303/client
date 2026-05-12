@@ -9,6 +9,9 @@ import {
 } from "lucide-react";
 import LeaveHistory from "../components/leave/LeaveHistory";
 import ApplyLeaveModel from "../components/leave/ApplyLeaveModel";
+import { useAuth } from "../context/AuthContext";
+import api from "../api/axios";
+import toast from "react-hot-toast";
 
 const Leave = () => {
   const [leaves, setLeaves] = useState([]);
@@ -16,13 +19,26 @@ const Leave = () => {
   const [showModel, setShowModel] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
 
-  const isAdmin = false;
+  const { user } = useAuth();
 
-  const fetchLeaves = useCallback(() => {
-    setLeaves(dummyLeaveData);
-    setTimeout(() => {
+  const isAdmin = user?.role === "ADMIN";
+
+  const fetchLeaves = useCallback(async () => {
+    try {
+      const url = "/leave";
+      const res = await api.get(url);
+      // setLeaves(res.data || []);
+      const result = res.data.data || res.data.leaves || res.data;
+      setLeaves(Array.isArray(result) ? result : []);
+      // const result = res.data.data || res.data;
+
+      // setLeaves(Array.isArray(result) ? result : result?.leaves || []);
+      if (res.data.employee?.isDeleted) setIsDeleted(true);
+    } catch (error) {
+      toast.error(error?.response?.data?.error || error.message);
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   }, []);
 
   useEffect(() => {
@@ -38,15 +54,21 @@ const Leave = () => {
   const casualCount = approvedLeaves.filter(
     (casual) => casual.type === "CASUAL",
   ).length;
-  const annualCount = approvedLeaves.filter((annual) => {
-    annual.type === "ANNUAL";
-  }).length;
+  const annualCount = approvedLeaves.filter(
+    (annual) => annual.type === "ANNUAL",
+  ).length;
+  // const annualCount = approvedLeaves.filter(
+  //   (annual) => annual.type === "ANNUAL",
+  // ).length;
 
   const leaveStats = [
     { label: "Sick Leave", value: sickCount, icon: ThermometerIcon },
     { label: "Casual Leave", value: casualCount, icon: UmbrellaIcon },
     { label: "Annual Leave", value: annualCount, icon: PalmtreeIcon },
   ];
+
+  console.log(leaves, "from leaves page for check employee name");
+  
 
   if (loading) return <Loading />;
   return (
@@ -70,7 +92,7 @@ const Leave = () => {
           </button>
         )}
       </div>
-      {isAdmin && (
+      {!isAdmin && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5 mb-8 ">
           {leaveStats.map((item) => (
             <div

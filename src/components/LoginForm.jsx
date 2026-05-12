@@ -1,7 +1,15 @@
 import React, { useState } from "react";
 import LoginLeftSide from "./LoginLeftSide";
-import { ArrowLeftIcon, DotSquare, EyeIcon, EyeOffIcon, Loader2Icon } from "lucide-react";
-import { Link } from "react-router-dom";
+import {
+  ArrowLeftIcon,
+  DotSquare,
+  EyeIcon,
+  EyeOffIcon,
+  Loader2Icon,
+} from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import toast from "react-hot-toast";
 
 const LoginForm = ({ role, title, subtitle }) => {
   const [email, setEmail] = useState();
@@ -10,8 +18,25 @@ const LoginForm = ({ role, title, subtitle }) => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const { login } = useAuth();
+
+  const navigate = useNavigate()
+
+
+
+  const handleSubmit = async(e) => {
     e.preventDefault();
+    setError("")
+    setLoading(true)
+    try{
+      await login({email, password, role})
+      navigate("/dashboard")
+    }catch(error){
+      console.log(error);
+      toast.error(error.response?.data?.error || error.message || "Login failed")
+    }finally{
+      setLoading(false)
+    }
   };
   return (
     <div className="min-h-screen flex flex-col  md:flex-row">
@@ -57,21 +82,33 @@ const LoginForm = ({ role, title, subtitle }) => {
               </label>
               <div className="relative">
                 <input
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="pr-11"
-                placeholder="●●●●●●"
-              />
-              <button type="button" className="absolute  right-3  top-1/2 -translate-y-1/2 text-slate-400  hover:text-slate-600 transition-colors cursor-pointer" onClick={()=>setShowpassword(!showPassword)}>
-                {showPassword ? <EyeOffIcon size={18}/> : <EyeIcon size={18}/>}
-              </button>
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="pr-11"
+                  placeholder="●●●●●●"
+                />
+                <button
+                  type="button"
+                  className="absolute  right-3  top-1/2 -translate-y-1/2 text-slate-400  hover:text-slate-600 transition-colors cursor-pointer"
+                  onClick={() => setShowpassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOffIcon size={18} />
+                  ) : (
+                    <EyeIcon size={18} />
+                  )}
+                </button>
               </div>
             </div>
-            <button type="submit" disabled={loading} className="w-full py-3 bg-linear-to-r from-indigo-600 to-indigo-500 text-white rounded-md text-sm font-semibold hover:from-indigo-700 hover:to-indigo-600 disabled:opacity-50 transition-all duration-200 shadow-lg shadow-indigo-50/25 active:scale-[0.98] flex items-center justify-center">
-            {loading&&<Loader2Icon/>}
-            Sign in
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3 bg-linear-to-r from-indigo-600 to-indigo-500 text-white rounded-md text-sm font-semibold hover:from-indigo-700 hover:to-indigo-600 disabled:opacity-50 transition-all duration-200 shadow-lg shadow-indigo-50/25 active:scale-[0.98] flex items-center justify-center"
+            >
+              {loading && <Loader2Icon />}
+              Sign in
             </button>
           </form>
         </div>

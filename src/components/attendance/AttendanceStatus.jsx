@@ -7,21 +7,28 @@ import {
 import React from "react";
 
 const AttendanceStatus = ({ history }) => {
-
-
-
-  const totalPresent = history.filter((p) =>p.status === "PRESENT" | p.status === "LATE"
+  const totalPresent = history.filter(
+    (p) => (p.status === "PRESENT") | (p.status === "LATE"),
   ).length;
 
+  const totalLate = history.filter((L) => L.status === "LATE").length;
 
-  const totalLate = history.filter((L) => 
-    L.status === "LATE"
-  ).length;
+  const totalHours = history.reduce(
+    (sum, record) => sum + record.workingHours * 60,
+    0,
+  );
 
+  const totalMinutes = history.reduce(
+    (sum, record) => sum + record.workingHours * 60,
+    0,
+  );
 
+  const averageMinutes = history.length > 0 ? totalMinutes / history.length : 0;
 
-
-
+  const averageDisplay =
+    averageMinutes < 60
+      ? `${averageMinutes.toFixed(0)} min`
+      : `${(averageMinutes / 60).toFixed(1)} hrs`;
 
   const status = [
     {
@@ -36,7 +43,7 @@ const AttendanceStatus = ({ history }) => {
     },
     {
       label: "Avg. Work Hrs",
-      value: "8.5 Hrs",
+      value: averageDisplay,//"8.5 Hrs", 
       icon: ClockIcon,
     },
   ];

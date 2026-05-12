@@ -8,12 +8,17 @@ import {
   DollarSignIcon,
   FileTextIcon,
   LayoutGridIcon,
+  Loader2Icon,
   LogOutIcon,
   MenuIcon,
   SettingsIcon,
   UserIcon,
   XIcon,
 } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+import api from "../api/axios";
+
+// import { useAuth } from "../context/AuthContext";
 
 const Sidebar = () => {
   const { pathname } = useLocation();
@@ -26,7 +31,21 @@ const Sidebar = () => {
     setMobileMenu(false);
   }, [pathname]);
 
-  const role = "" || "EMPLOYEE";
+  const handleLogout = () => {
+    logOut();
+    window.location.href = "/login";
+  };
+
+  const { logOut, user, loading } = useAuth();
+
+  useEffect(() => {
+    api.get("/profile").then(({ data }) => {
+      if (data.firstName)
+        setUserName(`${data.firstName} ${data.lastName || ""}`.trim());
+    });
+  }, []);
+
+  const role = user?.role || "EMPLOYEE";
 
   const navItems = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutGridIcon },
@@ -37,10 +56,6 @@ const Sidebar = () => {
     { name: "PaySlips", href: "/payslips", icon: DollarSignIcon },
     { name: "settings", href: "/settings", icon: SettingsIcon },
   ];
-
-  const handleLogout = () => {
-    window.location.href = "/login";
-  };
 
   const sideBarContent = (
     <>
@@ -93,58 +108,53 @@ const Sidebar = () => {
       </div>
 
       <div className="flex-1 px-3 space-y-0.5 overflow-y-auto ">
-        {navItems.map((item) => {
-          const isActive = pathname.startsWith(item.href);
-          // return (
-          //   <Link>
-          //     {isActive &&
-          //       <div className="absolute left-0  top-1/2 -translate-1/2 w-[3px] h-5 rounded-r-full bg-indigo-500"/>
-          //         {
-          //           <item.icon
-          //             className={`w-[17px] h-[17px] shrink-0 ${isActive ? "text-indigo-300" : "text-slate-400 group-hover:text-slate-300"}`}
-          //           />
-          //         }
-          //         <span className="flex-1">{item.name}</span>
-          //         {isActive &&
-          //           <ChevronRightIcon className="3-3.5 h-3.5 text-indigo-500/50" />
-          //         }
-          //   </Link>
-          // )
-          return (
-            <Link
-              key={item.name}
-              to={item.href}
-              className={`flex items-center gap-3 px-3 py-2 rounded-lg relative group ${
-                isActive
-                  ? "bg-indigo-500/10 text-indigo-300"
-                  : "text-slate-400 hover:text-white hover:bg-white/5"
-              }`}
-            >
-              {/* Active indicator */}
-              {isActive && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-indigo-500" />
-              )}
+        {loading ? (
+          <div>
+            <Loader2Icon className="animate-spin w-4 h-4"/>
+            <span className="text-sm">Loading...</span>
+          </div>
+        ) : (
+          navItems.map((item) => {
+            const isActive = pathname.startsWith(item.href);
+            return (
+              <Link
+                key={item.name}
+                to={item.href}
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg relative group ${
+                  isActive
+                    ? "bg-indigo-500/10 text-indigo-300"
+                    : "text-slate-400 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                {/* Active indicator */}
+                {isActive && (
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-indigo-500" />
+                )}
 
-              {/* Icon */}
-              <item.icon
-                className={`w-[17px] h-[17px] shrink-0 ${isActive ? "text-indigo-300" : "text-slate-400 group-hover:text-slate-300"}`}
-              />
+                {/* Icon */}
+                <item.icon
+                  className={`w-[17px] h-[17px] shrink-0 ${isActive ? "text-indigo-300" : "text-slate-400 group-hover:text-slate-300"}`}
+                />
 
-              {/* Text */}
-              <span className="flex-1">{item.name}</span>
+                {/* Text */}
+                <span className="flex-1">{item.name}</span>
 
-              {/* Arrow */}
-              {isActive && (
-                <ChevronRightIcon className="w-3.5 h-3.5 text-indigo-500/50" />
-              )}
-            </Link>
-          );
-        })}
+                {/* Arrow */}
+                {isActive && (
+                  <ChevronRightIcon className="w-3.5 h-3.5 text-indigo-500/50" />
+                )}
+              </Link>
+            );
+          })
+        )}
       </div>
 
       <div className="p-3 border-t border-white/6">
-        <button className="flex items-center gap-3 w-full  px-3 py-2.5  rounded-md text-[13px] font-medium text-slate-400 hover:text-rose-400 hover:bg-rose-500/8 transition-all duration-150">
-          <LogOutIcon className="w-[17px] h-[17px]" onClick={handleLogout} />
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-3 w-full  px-3 py-2.5  rounded-md text-[13px] font-medium text-slate-400 hover:text-rose-400 hover:bg-rose-500/8 transition-all duration-150"
+        >
+          <LogOutIcon className="w-[17px] h-[17px]" />
           Log Out
         </button>
       </div>
